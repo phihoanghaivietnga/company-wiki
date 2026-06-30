@@ -1,3 +1,10 @@
+---
+ingest_date: 2026-06-30
+wiki_pages_affected:
+  - fix-babel-import-error.md
+status: active
+superseded_sections: []
+---
 # TÀI LIÊU XỬ LÝ LỖI: BABEL / REACT TỰ SINH IMPORT TRÊN TRÌNH DUYỆT
 
 ## 1. MÔ TẢ SỰ CỐ

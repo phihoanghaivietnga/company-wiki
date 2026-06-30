@@ -23,6 +23,13 @@ company-wiki/
 │   ├── AGENTS.md                      ← Schema riêng (kế thừa master, có thể override)
 │   ├── raw/do/
 │   ├── raw/done/
+│   ├── partner-tracker/               ← Luồng 11: Trao đổi đối tác (Excel tracker)
+│   │   ├── snapshots/
+│   │   └── tracker.md
+│   ├── agreements/                    ← Luồng 12: Tài liệu đã thống nhất (bằng chứng)
+│   │   ├── active/
+│   │   ├── archived/
+│   │   └── index.md
 │   └── wiki/
 │       ├── index.md
 │       ├── log.md
@@ -42,6 +49,20 @@ company-wiki/
 - AI chỉ được ghi vào thư mục `wiki/` và các file trong `_system/`
 - Mọi conflict phải **flag lên người dùng**, AI không được tự quyết
 - Mọi quyết định giải quyết conflict phải ghi rõ **WHY** (lý do) — trường `lý_do` không được để trống
+
+---
+
+## Tiêu chí phân loại file đầu vào (áp dụng đầu tiên, trước khi chọn luồng)
+
+Khi người dùng đưa vào 1 file `.docx`, `.pdf`, hoặc `.xlsx`, AI phải hỏi/xác định theo tiêu chí sau trước khi xử lý:
+
+| Câu hỏi quyết định | Nếu CÓ | Nếu KHÔNG |
+|---|---|---|
+| File có còn được gửi version mới, cập nhật tiếp không? | → **Luồng 11 (Partner Tracker)** | → xét tiếp |
+| File là bảng nhiều dòng có cột trạng thái/ý kiến hai bên? | → **Luồng 11** | → **Luồng 12 (Agreement Archive)** |
+| File là văn bản đã chốt, không đổi nữa (.docx, .pdf, hoặc .xlsx báo cáo 1 lần)? | → **Luồng 12** | — |
+
+**Quy tắc nhanh**: `.docx` và `.pdf` luôn đi Luồng 12. `.xlsx` thì xét: còn update tiếp → Luồng 11; đã đóng băng → Luồng 12.
 
 ---
 
@@ -517,6 +538,132 @@ Quét lại các trang liên quan để phát hiện conflict mới phát sinh t
 
 ---
 
+## Luồng 11 — Partner Tracker Sync
+
+**Trigger:** Người dùng đưa vào file `.xlsx` đang trao đổi với đối tác (còn cập nhật, có cột trạng thái/ý kiến hai bên).
+
+**Mục đích:** AI nắm được toàn bộ thông tin đang trao đổi với đối tác (lỗi, phát sinh mới, vấn đề cần bàn) ở mức độ chi tiết từng dòng, không chỉ tóm tắt chung chung.
+
+### Cấu trúc thư mục
+
+```text
+project-{X}/
+└── partner-tracker/
+    ├── snapshots/
+    │   ├── 2026-06-29_partner-feedback.xlsx
+    │   └── 2026-07-05_partner-feedback.xlsx
+    └── tracker.md
+```
+
+- `snapshots/`: lưu nguyên bản file mỗi lần đối tác/người dùng gửi, đặt tên `{YYYY-MM-DD}_{ten-file-goc}`, **bất biến, không sửa**
+- `tracker.md`: AI duy trì, tổng hợp từng dòng thành tri thức có cấu trúc, có thể search/reasoning được
+
+### Quy trình sync khi có file .xlsx mới
+
+**Bước 1:** Lưu file vào `partner-tracker/snapshots/` với tên có ngày tháng.
+
+**Bước 2:** AI đọc file, xác định các cột: Ý kiến của user, Ý kiến đối tác, Trạng thái, Loại vấn đề, Chức năng liên quan.
+
+**Bước 3:** Diff với `tracker.md` hiện tại:
+- Dòng chưa có ID → đây là issue mới, gán ID mới (`ISSUE-{số tăng dần}`), **ID không bao giờ đổi qua các lần sync**
+- Dòng đã có ID nhưng trạng thái/nội dung thay đổi → cập nhật, giữ nguyên ID
+- Dòng có trạng thái "Đã xử lý"/"Đóng" → chuyển từ mục "Đang mở" sang "Đã đóng" trong `tracker.md`
+
+**Bước 4:** Nếu phát hiện dòng dữ liệu mơ hồ (ví dụ cột "Ý kiến của tao" trống nhưng trạng thái là "Đang xử lý") → **chủ động hỏi người dùng** trước khi ghi, không tự suy diễn.
+
+**Bước 5:** Nếu issue liên quan đến chức năng đã có trang wiki → thêm link `[[trang]]`. Nếu nội dung đối tác phản hồi mâu thuẫn với spec đã ghi trong wiki → kích hoạt Luồng Xử lý Conflict (đã có trong AGENTS_MASTER.md).
+
+**Bước 6:** Ghi 1 dòng vào `wiki/log.md` như ingest bình thường.
+
+### Format `tracker.md`
+
+```markdown
+# Partner Tracker — {Tên đối tác / dự án}
+
+**Cập nhật lần cuối**: 2026-07-05 (snapshot: 2026-07-05_partner-feedback.xlsx)
+
+---
+
+## Đang mở (open)
+
+### [ISSUE-001] Lỗi: Nút thanh toán không hoạt động trên Safari
+- **Loại**: Lỗi
+- **Chức năng**: Paywall checkout
+- **Ý kiến đối tác**: Button không trigger Stripe sheet trên Safari iOS
+- **Ý kiến của tao**: Cần test lại trên Safari 17+, nghi do CSS sticky bottom
+- **Trạng thái**: Đang xử lý
+- **Lần đầu xuất hiện**: 2026-06-29
+- **Lần cập nhật gần nhất**: 2026-07-05
+- **Liên kết**: [[paywall-ux]]
+
+---
+
+## Đã đóng (resolved)
+
+### [ISSUE-000] Phát sinh mới: Thêm Google Pay
+- **Trạng thái cuối**: Đã triển khai (2026-07-03)
+- **Tóm tắt**: [nội dung đã xử lý xong]
+```
+
+---
+
+## Luồng 12 — Agreement Archive
+
+**Trigger:** Người dùng đưa vào file `.docx`, `.pdf`, hoặc `.xlsx` đã thống nhất, không thay đổi nữa.
+
+**Mục đích:** Lưu trữ tài liệu đã thống nhất giữa các phòng ban/đối tác làm bằng chứng đối chứng pháp lý sau này. AI **không được diễn giải lại nội dung pháp lý bằng văn phong riêng** — chỉ tóm tắt "về cái gì" và trỏ về bản gốc.
+
+### Cấu trúc thư mục
+
+```text
+project-{X}/
+└── agreements/
+    ├── active/       ← Còn hiệu lực
+    │   ├── spec-v2-confirmed.docx
+    │   └── budget-approved.xlsx
+    ├── archived/     ← Hết hiệu lực, vẫn giữ để đối chứng
+    │   └── spec-v1-confirmed.docx
+    └── index.md
+```
+
+### Quy trình
+
+**Khi có file mới được thống nhất:**
+1. Copy nguyên file (giữ nguyên định dạng gốc, không convert) vào `agreements/active/`
+2. AI thêm 1 dòng vào bảng "Active" trong `index.md`: tên file, ngày, tóm tắt 1 câu (về cái gì, không diễn giải nội dung), link wiki liên quan nếu có
+3. Nếu file này thay thế 1 file cũ → chuyển file cũ sang `archived/`, cập nhật `index.md`
+
+**Khi 1 file hết hiệu lực** (có bản mới thay thế, hoặc quyết định khác):
+1. Move file từ `active/` sang `archived/`
+2. Chuyển dòng tương ứng trong `index.md` từ bảng Active xuống bảng Archived, ghi rõ lý do và file thay thế (nếu có)
+
+### Format `index.md`
+
+```markdown
+# Agreement Index — project-{X}
+
+## Active
+
+| File | Ngày | Nội dung | Liên quan |
+|---|---|---|---|
+| spec-v2-confirmed.docx | 2026-06-20 | Spec paywall v2 đã chốt Product-Eng | [[paywall-ux]] |
+| budget-approved.xlsx | 2026-07-01 | Ngân sách Q3 đã duyệt | — |
+
+## Archived
+
+| File | Ngày | Lý do archive | Thay thế bởi |
+|---|---|---|---|
+| spec-v1-confirmed.docx | 2026-05-10 | Đã chốt phiên bản mới | spec-v2-confirmed.docx |
+```
+
+### Quy tắc tuyệt đối
+
+- AI không bao giờ viết lại/diễn giải nội dung điều khoản, cam kết, số liệu trong file — chỉ mô tả chủ đề
+- Không convert định dạng file gốc
+- Không xóa file khỏi `archived/` dù đã hết hiệu lực
+
+---
+
 ## Trả lời câu hỏi (Q&A thông thường)
 
 Khi người dùng đặt câu hỏi thông thường (không phải trigger của Luồng 5, 6, 7):
@@ -643,3 +790,5 @@ superseded_sections: []  # Điền nếu status != active
 | 8 | Daily Companion | `"Chat"`, buổi sáng | Phase 1 |
 | 9 | Knowledge Interviewer | `"Reflection"`, cuối ngày | Phase 2 |
 | 10 | Conflict Feedback Loop | Tự động sau conflict resolution | Phase 1 |
+| 11 | Partner Tracker Sync | Đưa file `.xlsx` trao đổi đối tác (còn update) | Core |
+| 12 | Agreement Archive | Đưa file `.docx`/`.pdf`/`.xlsx` đã thống nhất | Core |

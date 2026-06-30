@@ -45,6 +45,57 @@ Các conflict đang pending trong `_system/conflict_audit_log.md`:
 
 ## Danh sách báo cáo
 
+## 2026-06-30 — Daily Scan
+
+### Tổng quan
+- **Tổng file mới trong raw/do/**: 1
+- **Đã ingest**: 1
+- **Conflict phát hiện**: 0
+- **Conflict đã resolve**: 0
+- **Wiki pages**: ~52 (tạo mới: 1, cập nhật: 0)
+- **Lỗi**: Không có
+
+### Chi tiết theo project
+
+| Project | File mới | Đã ingest | Conflict mới | Conflict resolved | Trang wiki ảnh hưởng |
+|---|---|---|---|---|---|
+| bangtinvn | 1 | 1 | 0 | 0 | fix-babel-import-error.md |
+| _global | 0 | 0 | 0 | 0 | — |
+| db-hisnano_v2 | 0 | 0 | 0 | 0 | — |
+| bod | 0 | 0 | 0 | 0 | — |
+| core-isofh | 0 | 0 | 0 | 0 | — |
+| etl_v2 | 0 | 0 | 0 | 0 | — |
+| webapp | 0 | 0 | 0 | 0 | — |
+
+### Conflict cần chú ý
+
+Không có conflict pending.
+
+### 🔍 Lint toàn bộ (09:41 — 30/06/2026)
+
+| Project | Wiki pages | Broken link | Mồ côi | Thiếu nguồn | [LỖI THỜI] | Đánh giá |
+|---|---|---|---|---|---|---|
+| bangtinvn | 1 | 1 (đã fix) | 0 | 0 | 0 | ✅ Sạch |
+| _global | 0 | 0 | 0 | — | 0 | ✅ Skeleton, chưa có trang |
+| db-hisnano_v2 | 0 | 0 | 0 | — | 0 | ✅ Skeleton, chưa có trang |
+| bod | 10 | 0 | 0 | 0 | 0 | ✅ Sạch |
+| core-isofh | 18 | 0 | 0 | 0 | 0 | ✅ Sạch |
+| etl_v2 | 11 | 0 | 0 | 0 | 0 | ✅ Sạch |
+| webapp | 14 | 0 | 0 | 0 | 0 | ✅ Sạch |
+
+#### Chi tiết sửa chữa
+- **bangtinvn/fix-babel-import-error.md**: Broken link `[[tong-quan-he-thong]]` → thay bằng comment placeholder. Link này trỏ tới trang thuộc project webapp, không tồn tại trong phạm vi bangtinvn.
+
+### Hành động khuyến nghị
+1. ~~Lint toàn bộ 6 project~~ ✅ Đã hoàn thành — 1 broken link đã fix
+2. Reflection cuối ngày — capture bài học từ đợt nâng cấp lớn
+
+### Ghi chú
+- Hệ thống vừa được rà soát và chuẩn hóa cấu trúc thư mục: tạo mới `_global/`, bổ sung file nền tảng cho bangtinvn và db-hisnano_v2, thêm `thong_tin_mau_thuan.md` cho 4 project thiếu
+- Lint toàn bộ 7 project (gồm _global): chỉ phát hiện 1 broken link duy nhất, đã fix. Tất cả project đều sạch — không có trang mồ côi, không thiếu nguồn, không có nội dung [LỖI THỜI].
+
+---
+
 <!-- AI tự động thêm báo cáo mới vào đầu file sau mỗi lần Daily Scan -->
 
 ---

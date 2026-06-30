@@ -5,8 +5,9 @@ Nhật ký append-only ghi lại mọi thay đổi trong wiki của project này
 ---
 
 ## 2026-06-30
+- **Ingest**: `fix-babel-import-error.md` → Trang mới: [[fix-babel-import-error]] (xử lý lỗi Babel/React import trên trình duyệt)
 - **Khởi tạo**: Tạo cấu trúc wiki nền tảng
-- **File**: `wiki/index.md` (mới), `wiki/log.md` (mới)
+- **File**: `wiki/index.md` (mới), `wiki/log.md` (mới), `wiki/fix-babel-import-error.md` (mới)
 
 ---
 

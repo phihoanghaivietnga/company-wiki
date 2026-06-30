@@ -1,5 +1,5 @@
 # Mục lục Wiki — project-llm-bangtinvn.vietngagroup.vn
 
-<!-- AI tự động cập nhật khi thêm/xóa trang wiki -->
+- [[fix-babel-import-error]] — Xử lý lỗi Babel/React tự sinh import trên trình duyệt
 
 **Cập nhật lần cuối**: 2026-06-30

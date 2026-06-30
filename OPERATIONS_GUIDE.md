@@ -13,6 +13,13 @@ company-wiki/
 ├── _global/wiki/            ← 📚 Tri thức đã tổ chức (AI ghi, bạn đọc)
 ├── project-{X}/raw/do/      ← 📥 File mới của project X
 ├── project-{X}/wiki/        ← 📚 Tri thức project X
+├── project-{X}/partner-tracker/  ← 🔄 Trao đổi đối tác (Excel tracker, Luồng 11)
+│   ├── snapshots/               ← File Excel gốc từng đợt (bất biến)
+│   └── tracker.md               ← AI tổng hợp từng dòng issue
+├── project-{X}/agreements/      ← 📜 Tài liệu đã thống nhất (Luồng 12)
+│   ├── active/                  ← Còn hiệu lực
+│   ├── archived/                ← Hết hiệu lực, giữ để đối chứng
+│   └── index.md                 ← Mục lục agreement
 ├── _system/                 ← 📋 Trạng thái hệ thống (AI tự quản lý)
 │   ├── daily_scan_report.md      ← Báo cáo scan hàng ngày
 │   ├── conflict_audit_log.md     ← Mâu thuẫn cần giải quyết
@@ -80,6 +87,96 @@ Bạn muốn ingest tất cả, hay chọn từng project?
 - Ghi vào `_system/conflict_audit_log.md` (không làm phiền ngay)
 
 **Thời gian**: 2-5 phút (tùy số lượng file)
+
+---
+
+### 🔄 KHI CÓ FILE EXCEL TRAO ĐỔI ĐỐI TÁC: Partner Tracker (Luồng 11)
+
+Dùng khi bạn có file `.xlsx` đang trao đổi qua lại với đối tác (có cột trạng thái, ý kiến hai bên, còn cập nhật tiếp).
+
+**Bước 1 — Bạn thả file:**
+- Copy file `.xlsx` vào `project-X/partner-tracker/snapshots/`
+- Đặt tên file theo format: `{YYYY-MM-DD}_{ten-file-goc}.xlsx` (ví dụ: `2026-06-29_partner-feedback.xlsx`)
+- Nếu thư mục `partner-tracker/` chưa có → AI sẽ tự tạo khi bạn yêu cầu sync lần đầu
+
+**Bước 2 — Bạn gõ lệnh sync:**
+- `"Sync partner tracker project-X"` — AI sẽ đọc file Excel, diff với tracker.md, cập nhật issue
+
+**AI sẽ làm:**
+- Lưu snapshot file gốc (bất biến, không sửa)
+- Đọc file Excel, xác định các cột: Ý kiến của user, Ý kiến đối tác, Trạng thái, Loại vấn đề
+- So sánh với `tracker.md` hiện tại:
+  - Issue mới → gán ID mới (`ISSUE-001`, `ISSUE-002`...)
+  - Issue cũ thay đổi trạng thái → cập nhật, giữ nguyên ID
+  - Issue đã đóng → chuyển xuống mục "Đã đóng"
+- Nếu có dòng dữ liệu mơ hồ → AI sẽ hỏi bạn trước khi ghi
+- Nếu issue liên quan đến trang wiki có sẵn → AI tự thêm link `[[trang]]`
+
+**Bước 3 — Bạn xem kết quả:**
+- Mở `project-X/partner-tracker/tracker.md` để xem tổng hợp
+- Hoặc hỏi AI (xem mục bên dưới)
+
+**Thời gian**: 1-2 phút / lần sync
+
+---
+
+### 🔍 CÁCH HỎI AI VỀ TÌNH TRẠNG ISSUE ĐANG MỞ VỚI ĐỐI TÁC
+
+| Bạn muốn... | Gõ lệnh |
+|---|---|
+| Xem tất cả issue đang mở | `"Đối tác {tên} đang có những issue nào đang mở?"` |
+| Xem chi tiết 1 issue | `"Chi tiết ISSUE-003 bên project-X?"` |
+| Xem issue theo chức năng | `"Có issue nào liên quan đến paywall không?"` |
+| Xem lịch sử 1 issue qua các lần sync | `"Lịch sử ISSUE-001 thay đổi thế nào?"` |
+
+**AI sẽ:**
+- Đọc `tracker.md` và trả lời dựa trên dữ liệu đã tổng hợp
+- Nếu cần đối chiếu với spec trong wiki → AI sẽ tự tìm và dẫn link
+
+---
+
+### 📜 KHI CÓ FILE ĐÃ THỐNG NHẤT: Agreement Archive (Luồng 12)
+
+Dùng khi bạn có file `.docx`, `.pdf`, hoặc `.xlsx` đã chốt, không thay đổi nữa — cần lưu làm bằng chứng đối chứng sau này.
+
+**Quy tắc quan trọng:**
+- AI **không được diễn giải** nội dung điều khoản, cam kết, số liệu trong file
+- AI chỉ tóm tắt "về cái gì" và trỏ về bản gốc
+- File gốc giữ nguyên định dạng, không convert
+
+**Bước 1 — Bạn thả file:**
+- Copy file gốc vào `project-X/agreements/active/`
+- Giữ nguyên tên file gốc (ví dụ: `spec-v2-confirmed.docx`, `budget-q3-approved.xlsx`)
+
+**Bước 2 — Bạn gõ lệnh:**
+- `"Archive agreement project-X"` — AI sẽ quét thư mục `agreements/active/`, thêm file mới vào `index.md`
+- Hoặc `"Thêm agreement {ten-file} vào project-X"` — thêm từng file
+
+**AI sẽ làm:**
+- Thêm 1 dòng vào bảng Active trong `agreements/index.md`: tên file, ngày, tóm tắt 1 câu (chỉ nói "về cái gì")
+- Nếu file mới thay thế file cũ → AI tự chuyển file cũ sang `archived/`, cập nhật `index.md`
+- Liên kết đến trang wiki liên quan nếu có
+
+**Bước 3 — Khi file hết hiệu lực:**
+- Gõ: `"Chuyển agreement {ten-file} sang archived"`
+- AI sẽ move file + cập nhật `index.md` (ghi rõ lý do)
+
+**Thời gian**: ~1 phút / file
+
+---
+
+### 🔍 CÁCH TRA CỨU AGREEMENT KHI CẦN ĐỐI CHỨNG
+
+| Bạn muốn... | Gõ lệnh |
+|---|---|
+| Xem danh sách agreement đang hiệu lực | `"Project-X có những agreement nào đang active?"` |
+| Tìm agreement theo từ khóa | `"Có agreement nào về ngân sách Q3 không?"` |
+| Xem lịch sử thay thế 1 agreement | `"Agreement spec-v1 được thay thế bởi cái nào?"` |
+| Mở file gốc để đối chứng | `"Mở agreement spec-v2-confirmed.docx"` hoặc tự mở từ `agreements/active/` |
+
+**AI sẽ:**
+- Đọc `agreements/index.md` và trả lời
+- Luôn trỏ về file gốc, không diễn giải nội dung pháp lý
 
 ---
 
@@ -224,6 +321,10 @@ Các file log sẽ được archive theo tháng:
 | `"Lint toàn bộ"` | Kiểm tra sức khỏe wiki | Hàng tuần |
 | `"Xem conflict đang pending"` | Xem mâu thuẫn chưa giải quyết | Khi cần |
 | `"Kiểm tra query log"` | Xem Q&A chưa lưu | Hàng tháng |
+| `"Sync partner tracker project-X"` | Đồng bộ file Excel trao đổi đối tác | Khi có file .xlsx mới từ đối tác |
+| `"Đối tác X đang có issue nào mở?"` | Hỏi tình trạng issue với đối tác | Khi cần nắm tình hình |
+| `"Archive agreement project-X"` | Lưu file đã thống nhất vào agreement | Khi có file .docx/.pdf/.xlsx đã chốt |
+| `"Project-X có agreement nào active?"` | Tra cứu agreement đang hiệu lực | Khi cần đối chứng |
 
 ---
 
@@ -232,8 +333,12 @@ Các file log sẽ được archive theo tháng:
 ```
 🌅 SÁNG:    "Chào buổi sáng"
 📥 CÓ FILE: Thả vào raw/do/ → "Scan toàn bộ wiki" → "Ingest tất cả"
+🔄 PARTNER: Thả .xlsx vào partner-tracker/snapshots/ → "Sync partner tracker project-X"
+📜 AGREEMENT: Thả file đã chốt vào agreements/active/ → "Archive agreement project-X"
 ⚠️ CONFLICT: Trả lời (a/b/c/d) + lý do khi AI hỏi
 🔍 HỎI:    "Tìm thông tin về X" / "Tư vấn về Y" / "Tại sao Z?"
+🔍 ĐỐI TÁC: "Đối tác X đang có issue nào mở?"
+🔍 ĐỐI CHỨNG: "Project-X có agreement nào về Y?"
 🌙 TỐI:    "Reflection"
 📅 T6:      "Lint toàn bộ"
 📅 ĐẦU THÁNG: "Kiểm tra query log"
