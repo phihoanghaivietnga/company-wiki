@@ -5,6 +5,84 @@ Nhật ký kiểm toán mâu thuẫn tri thức — ghi nhận mọi conflict đ
 
 ---
 
+## 2026-07-01 11:24 — Luồng 4 — Lint project-test-kim
+
+### Tổng quan
+- **Số file đã quét:** 9 (5 wiki + 2 raw/done + 1 tracker + 1 agreements)
+- **Số issue phát hiện:** 8
+  - Conflict: 1
+  - Duplicate: 0
+  - Stale: 1
+  - Gap: 5
+  - Broken link: 1
+  - Missing link: 0
+- **Thời gian thực hiện:** ~10 phút
+
+### Chi tiết từng issue
+
+#### Conflict #1: note_rac.md chỉ có 1 dòng "Nội dung test" — thiếu nội dung thật
+- **Loại:** Mâu thuẫn trạng thái / Thiếu hụt nội dung
+- **Mô tả:** File `note_rac.md` chỉ chứa đúng 1 dòng "Nội dung test", không có nội dung thực tế. Trong khi đó `wiki/log.md` ghi nhận file này được tạo từ ingest `B-lich-release-update.md` và `index.md` liệt kê nó là một trang wiki chính thức.
+- **File liên quan:**
+  - `project-test-kim/wiki/note_rac.md` (toàn bộ): "Nội dung test"
+  - `project-test-kim/wiki/index.md` (dòng 9-11): liệt kê [[note_rac.md|Note từ RAC]] như một trang có nội dung
+  - `project-test-kim/wiki/log.md` (dòng 5-6): ghi nhận ingest B tạo note_rac
+- **Đề xuất:** Khôi phục nội dung `note_rac.md` từ `raw/done/B-lich-release-update.md` (phản hồi RAC về delay đối tác Shopee/Lazada/Tiki, khuyến nghị dời release).
+- **Mức độ:** High
+
+#### Stale #1: lich-release-sniper.md có nội dung được đánh dấu [LỖI THỜI]
+- **Loại:** Nội dung đánh dấu lỗi thời đã xử lý đúng
+- **Mô tả:** `lich-release-sniper.md` dòng 11-12 đã đánh dấu `[LỖI THỜI]` cho nội dung cũ từ A (Q3/2026, push notification trước). Nội dung mới từ B (Q4/2026, paywall trước) đã thay thế. Đã xử lý đúng quy trình.
+- **File liên quan:**
+  - `project-test-kim/wiki/lich-release-sniper.md` (dòng 11-12)
+- **Đề xuất:** Không cần xử lý — đã đánh dấu đúng chuẩn. Có thể cân nhắc xóa hẳn nội dung [LỖI THỜI] sau 30 ngày.
+- **Mức độ:** Low (informational)
+
+#### Gap #1: Broken link trong thong_tin_mau_thuan.md
+- **Loại:** Broken link
+- **Mô tả:** `thong_tin_mau_thuan.md` dòng 19 chứa link `[[trang-khong-ton-tai]]` — đây là broken link vì không có file wiki nào tên này.
+- **File liên quan:**
+  - `project-test-kim/wiki/thong_tin_mau_thuan.md` (dòng 19)
+- **Đề xuất:** Xóa dòng 19 hoặc thay bằng link hợp lệ.
+- **Mức độ:** Medium
+
+#### Gap #2: log.md không có trong index.md
+- **Loại:** Thiếu liên kết (missing from index)
+- **Mô tả:** `wiki/log.md` tồn tại thực tế nhưng không được liệt kê trong `wiki/index.md`. File này là nhật ký ingest, cần được index hoặc ít nhất ghi chú rõ đây là file hệ thống.
+- **File liên quan:**
+  - `project-test-kim/wiki/index.md`
+  - `project-test-kim/wiki/log.md`
+- **Đề xuất:** Thêm dòng `[[log]]` vào index.md hoặc ghi chú "log.md là nhật ký hệ thống".
+- **Mức độ:** Low
+
+#### Gap #3: index.md mô tả note_rac không khớp thực tế
+- **Loại:** Thiếu chính xác
+- **Mô tả:** `index.md` liệt kê `[[lich-release-sniper]]` với mô tả "Lịch release sản phẩm Sniper — Q4/2026 (dời do delay đối tác), ưu tiên paywall trước push notification". Nhưng không có dòng nào cho `note_rac.md` và `thong_tin_mau_thuan.md` — 2 trang có thật trong wiki nhưng bị thiếu trong bảng index.
+- **File liên quan:**
+  - `project-test-kim/wiki/index.md` (dòng 9-11): chỉ có 1 dòng duy nhất cho lich-release-sniper
+- **Đề xuất:** Thêm dòng cho `note_rac.md` và `thong_tin_mau_thuan.md` vào bảng index, HOẶC cập nhật lại index cho đồng bộ với các file wiki thực tế.
+- **Mức độ:** Medium
+
+#### Gap #4: lich-release-sniper.md thiếu mục "Các trang liên quan" đầy đủ
+- **Loại:** Thiếu liên kết chéo
+- **Mô tả:** `lich-release-sniper.md` dòng 31-33 chỉ có "(chưa có trang liên quan nào)", nhưng thực tế có `thong_tin_mau_thuan.md` và `note_rac.md` đều liên quan đến conflict release Sniper. Nên link đến các trang này.
+- **File liên quan:**
+  - `project-test-kim/wiki/lich-release-sniper.md` (dòng 31-33)
+  - `project-test-kim/wiki/thong_tin_mau_thuan.md` (có link đến lich-release-sniper)
+  - `project-test-kim/wiki/note_rac.md` (từng có link đến lich-release-sniper)
+- **Đề xuất:** Thêm `[[thong_tin_mau_thuan]]` và `[[note_rac]]` vào mục "Các trang liên quan".
+- **Mức độ:** Low
+
+#### Gap #5: note_rac.md không có nội dung thực — không thể đánh giá format
+- **Loại:** Thiếu định dạng chuẩn (không thể đánh giá)
+- **Mô tả:** `note_rac.md` chỉ có 1 dòng "Nội dung test", không thể kiểm tra format chuẩn (Tóm tắt, Nguồn, Cập nhật lần cuối, Các trang liên quan).
+- **File liên quan:**
+  - `project-test-kim/wiki/note_rac.md`
+- **Đề xuất:** Khôi phục nội dung đầy đủ — xem Conflict #1 ở trên.
+- **Mức độ:** High
+
+---
+
 ## Cấu trúc một mục conflict
 
 ### Conflict đang pending
@@ -42,13 +120,38 @@ Nhật ký kiểm toán mâu thuẫn tri thức — ghi nhận mọi conflict đ
 
 ### Đang xử lý (Pending)
 
-<!-- Thêm conflict mới vào đây -->
+### Conflict #002 — CCCD bắt buộc trên WebApp vs HIS không bắt buộc CCCD (ISSUE-010)
+- **Ngày phát hiện**: 2026-07-01
+- **Project**: project-llm-wiki-webapp
+- **Nguồn gốc**: `partner-tracker/snapshots/issue_webapp_20260701.xlsx` — dòng ISSUE-010 (sync Partner Tracker)
+- **Mô tả**:
+  - **HIS**: hiện tại KHÔNG bắt buộc nhập CCCD khi người bệnh đến khám
+  - **WebApp**: bắt buộc nhập CCCD khi đăng ký tài khoản
+  - Hệ quả: thông tin NB trên HIS và WebApp không bao giờ khớp với những NB không để lại CCCD trên HIS
+- **Trang wiki liên quan**: [[project-llm-wiki-webapp/dong-bo-du-lieu-his]], [[project-llm-wiki-webapp/xac-thuc-bao-mat]], [[project-llm-wiki-webapp/ho-so-suc-khoe]]
+- **Ý kiến VN (PHẢN HỒI CỦA CNTT)**:
+  1. WebApp căn cứ vào đâu để bắt buộc nhập CCCD?
+  2. Những trường hợp khi đi khám không để lại số CCCD thì NB làm thế nào để đăng ký trên ứng dụng?
+- **Mức độ**: Major
+- **Đề xuất xử lý**: Cần thống nhất với ISOFH về phương án xử lý cho NB không có CCCD trên HIS. Các phương án khả dĩ: (a) HIS cập nhật bắt buộc CCCD, (b) WebApp cho phép đăng ký không CCCD và dùng mã NB thay thế, (c) cung cấp cơ chế xác thực thay thế.
+- **Trạng thái**: `pending` — đang trao đổi với ISOFH
 
 ---
 
 ### Đã xử lý (Resolved)
 
-<!-- Sau khi resolve, di chuyển conflict từ mục Pending xuống đây -->
+### Conflict #001 — Mâu thuẫn lịch release Sniper (thời điểm + thứ tự ưu tiên)
+- **Ngày phát hiện**: 2026-07-01
+- **Ngày giải quyết**: 2026-07-01
+- **Trang wiki**: [[project-test-kim/lich-release-sniper]]
+- **Nguồn cũ**: `A-lich-release.md` (ingest: 2026-07-01) — Release Q3/2026, ưu tiên push notification trước paywall
+- **Nguồn mới**: `B-lich-release-update.md` — Release Q4/2026 (delay từ đối tác thanh toán), ưu tiên paywall trước push notification
+- **Mức độ**: Major
+- **Quyết định**: (a) B thay thế hoàn toàn A — cập nhật toàn bộ thời điểm release và thứ tự ưu tiên theo B
+- **Lý do (WHY)**: Vì B là thông tin mới nhất, đã xác nhận với đối tác thanh toán
+- **Cập nhật wiki**: `lich-release-sniper.md` — đánh dấu nội dung A là LỖI THỜI, thay bằng nội dung B. Cập nhật nguồn thành B-lich-release-update.md. Metadata file A đánh dấu fully_superseded.
+- **Cascade check**: Không phát sinh conflict mới.
+- **Trạng thái**: `resolved`
 
 ---
 

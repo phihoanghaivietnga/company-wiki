@@ -107,6 +107,8 @@ Người bệnh đặt lịch → NVYT duyệt/từ chối (Web Vendor) → 00h 
 - Cần làm rõ RTO/RPO mục tiêu, cơ chế replication database và quy trình failover chi tiết (nguồn: 03_yeu_cau_tai_lieu_he_thong_mobile_web_his_2025_08_26.md)
 
 ### Từ tài liệu mới (20260619_luong_dong_bo_du_lieu_webapp_his.md)
-1. **Chuẩn hóa tên**: "Thủy" và "Thủy" thì hệ thống bên ISOFH xác định là tên giống hay khác nhau?
+1. **Chuẩn hóa tên**: "Thuỷ" và "Thủy" thì hệ thống bên ISOFH xác định là tên giống hay khác nhau?
 2. **Thiếu CCCD**: Những trường hợp không có CCCD có đồng bộ được dữ liệu không? Đã test case này chưa?
 3. **Đồng bộ các lần khám sau**: Dữ liệu đồng bộ như thế nào - kết thúc hồ sơ khám mới, hay mỗi dòng dữ liệu bất kỳ đều đẩy sang?
+
+

@@ -258,15 +258,41 @@ Quét lại các trang wiki liên quan để kiểm tra conflict mới phát sin
 
 **Trigger:** `"Lint project-X"` hoặc `"Lint toàn bộ"`
 
-### Checklist lint
+**Nguyên tắc bắt buộc:** Luồng này PHẢI thực thi bằng cách quét trực tiếp file thật
+trong `wiki/`, KHÔNG được suy luận/ước lượng từ `index.md` hoặc từ trí nhớ của
+session trước. Mỗi lần chạy phải làm lại từ Bước 1, không được rút gọn vì "tưởng
+đã biết" tình trạng wiki.
 
-1. Các trang mồ côi (không có trang nào link đến)
-2. Liên kết `[[...]]` trỏ đến trang không tồn tại (broken links)
-3. Khái niệm được nhắc đến trong nhiều trang nhưng chưa có trang riêng
-4. Khẳng định không có nguồn (thiếu `(nguồn: ...)`)
-5. Nội dung đánh dấu `[LỖI THỜI]` đã quá 30 ngày mà chưa được xử lý
-6. Trang không tuân thủ định dạng chuẩn
-7. Conflict chưa được giải quyết trong `thong_tin_mau_thuan.md` và `_system/conflict_audit_log.md`
+### Quy trình (thực hiện đúng thứ tự, không bỏ bước)
+
+**Bước 1: Liệt kê toàn bộ file thật trong `wiki/`**
+Lấy danh sách file thực tế có trong thư mục `wiki/` của project (không phải danh
+sách trong `index.md` — đây là 2 nguồn khác nhau, phải đối chiếu ở Bước 3).
+
+**Bước 2: Trích xuất toàn bộ liên kết từ mọi trang**
+Mở và đọc TỪNG file trong danh sách Bước 1, trích toàn bộ pattern `[[ten-trang]]`
+xuất hiện trong nội dung. Xây bảng: file nào link tới file nào (đồ thị liên kết
+2 chiều — ai trỏ tới ai).
+
+**Bước 3: Kiểm tra trang mồ côi**
+Với mỗi file trong danh sách Bước 1 (trừ `index.md`): nếu KHÔNG có file nào khác
+trỏ tới nó trong bảng Bước 2 → đây là trang mồ côi. (Không kết luận mồ côi chỉ
+vì thiếu tên trong `index.md` — phải dựa trên bảng liên kết thật.)
+
+**Bước 4: Kiểm tra broken link**
+Với mỗi link đích trong bảng Bước 2: nếu tên trang đó KHÔNG tồn tại trong danh
+sách file thật (Bước 1) → broken link.
+
+**Bước 5: Các kiểm tra còn lại (dựa trên nội dung đã đọc ở Bước 2)**
+- Khái niệm được nhắc đến ≥3 trang nhưng chưa có trang riêng
+- Khẳng định không có `(nguồn: ...)` kèm theo
+- Nội dung `[LỖI THỜI]` quá 30 ngày chưa xử lý (so ngày trong tag với ngày hiện tại)
+- Trang không đúng định dạng chuẩn (thiếu Tóm tắt/Nguồn/Cập nhật lần cuối)
+- Conflict `pending` chưa resolve trong `thong_tin_mau_thuan.md` / `conflict_audit_log.md`
+
+**Bước 6: Tổng hợp báo cáo**
+Chỉ tổng hợp sau khi đã hoàn tất Bước 1-5 trên toàn bộ file — không xuất báo cáo
+giữa chừng.
 
 ### Format báo cáo lint
 
@@ -442,13 +468,7 @@ Sử dụng template `_templates/strategy-analysis.md`:
 **Bước 2: Quét nhanh raw/do/**
 Đếm số file chưa xử lý trong tất cả project.
 
-**Bước 3: Quét Partner Tracker & Agreements**
-- Với mỗi project có `partner-tracker/`: đếm issue "Đang mở" trong tracker.md; 
-  kiểm tra snapshots/ có file mới hơn "Cập nhật lần cuối" chưa (báo nếu có, chưa sync)
-- Với mỗi project có `agreements/`: kiểm tra active/ có file nào chưa xuất hiện 
-  trong bảng Active của index.md không (báo nếu có, chưa archive)
-  
-**Bước 4: Tổng hợp và gợi ý**
+**Bước 3: Tổng hợp và gợi ý**
 
 ### Format output
 
@@ -672,6 +692,61 @@ project-{X}/
 
 ---
 
+## Luồng 13 — Chat Log Extraction
+
+**Trigger:** "Đưa file chat log", "Tổng hợp chat này", "Extract vấn đề đã chốt"
+
+**Input:** File nằm trong `project-X/raw/do/`, tên đúng format
+`project-chat-YYYYMMDD.md` (ngày lấy trực tiếp từ tên file, không tự đoán).
+Dòng đầu file có thể có `Nguồn: <cline|claude-web|chatgpt|khác>` (optional).
+Nếu không có → khi trích dẫn ghi "nguồn: không rõ", không tự bịa.
+
+Sai định dạng tên file, hoặc không nằm trong `raw/do/` của đúng 1 project →
+DỪNG, báo lại user, không tự đoán/tự sửa tên file.
+
+**Bước 1:** Đọc toàn bộ nội dung nguyên văn (không tóm tắt trước khi quét).
+
+**Bước 2:** Quét sơ bộ toàn file, kiểm tra có đoạn nào RÕ RÀNG thuộc về project
+khác (không phải project-X đang xử lý) không.
+- Có → DỪNG TOÀN BỘ LUỒNG. Báo cho user: liệt kê đoạn nghi ngờ + lý do nghi
+  ngờ, yêu cầu user sửa file gốc (xóa phần không liên quan) rồi chạy lại lệnh
+  từ đầu. KHÔNG tự lọc bỏ, KHÔNG tiếp tục xử lý phần còn lại.
+- Không có → qua Bước 3.
+
+**Bước 3:** Quét và liệt kê candidate list. Mỗi candidate gồm:
+- Vấn đề được nêu (1 câu)
+- Trích đoạn gốc làm evidence (nguyên văn, ngắn, không diễn giải)
+- Đánh giá sơ bộ: có vẻ đã chốt / có vẻ đang thảo luận (chỉ là gợi ý cho Bước
+  4, KHÔNG tự quyết)
+
+**Bước 4:** Trình bày toàn bộ candidate list theo đúng thứ tự xuất hiện trong
+chat, hỏi xác nhận TỪNG item theo format:
+- a) Đúng, đã chốt → ghi vào wiki
+- b) Chưa chốt, chỉ thảo luận → ghi vào `wiki/pending-chat-issue.md`
+- c) Đúng nhưng diễn giải sai → yêu cầu user cung cấp bản sửa, ghi theo bản sửa
+- d) Không liên quan/bỏ qua hẳn, không ghi ở đâu cả
+
+**Bước 5:** Với mọi item được đánh a) hoặc c) — trước khi ghi, kiểm tra có mâu
+thuẫn với nội dung hiện có trong `wiki/` của project này không.
+- Mâu thuẫn → áp dụng đúng Luồng Xử lý Conflict hiện có (flag a/b/c/d riêng +
+  bắt buộc ghi WHY trước khi update).
+- Không mâu thuẫn → ghi thẳng.
+
+**Bước 6:** Ghi các item a)/c) đã qua Bước 5 vào `wiki/` theo format chuẩn
+hiện có, kèm dòng nguồn: `(nguồn: {tên file}, ngày {từ tên file})`.
+
+**Bước 7:** Ghi các item b) vào `wiki/pending-chat-issue.md` (tạo file này nếu
+project chưa có), mỗi dòng gồm: ngày phát hiện, nội dung, tên file nguồn. File
+này được liệt lại mỗi khi Luồng 13 chạy tiếp cho project này.
+
+**Bước 8:** Update `wiki/log.md`: "Ingest chat log {ngày}, chốt N/{tổng
+candidate} vấn đề, M vào pending."
+
+**Bước 9:** Move file gốc từ `raw/do/` sang `raw/done/` (move nguyên văn,
+không sửa nội dung — đúng rule bất biến của `raw/`).
+
+---
+
 ## Trả lời câu hỏi (Q&A thông thường)
 
 Khi người dùng đặt câu hỏi thông thường (không phải trigger của Luồng 5, 6, 7):
@@ -800,3 +875,4 @@ superseded_sections: []  # Điền nếu status != active
 | 10 | Conflict Feedback Loop | Tự động sau conflict resolution | Phase 1 |
 | 11 | Partner Tracker Sync | Đưa file `.xlsx` trao đổi đối tác (còn update) | Core |
 | 12 | Agreement Archive | Đưa file `.docx`/`.pdf`/`.xlsx` đã thống nhất | Core |
+| 13 | Chat Log Extraction | "Đưa file chat log", "Tổng hợp chat này", "Extract vấn đề đã chốt" | Core |

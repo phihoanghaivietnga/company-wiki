@@ -37,7 +37,34 @@ Nhật ký tri thức hàng ngày — ghi lại bài học, quyết định, và
 
 ## Danh sách reflection
 
-<!-- AI tự động thêm mục mới vào đầu file sau mỗi buổi reflection -->
+## 2026-07-01
+
+**Ngày trong tuần**: Thứ Tư
+
+**Bài học hôm nay**: 
+- Kim xử lý không nhất quán giữa 2 lần thực thi cùng 1 yêu cầu: Lần 1 (Daily Companion - Luồng 8) chỉ đọc index.md để đếm trang → bỏ sót note-rac.md (trang ngoài index); Lần 2 (Lint - Luồng 4) mới list toàn bộ thư mục wiki/ và đối chiếu với index → phát hiện đủ trang mồ côi + broken link. Gốc: Bước "quét nhanh" của Luồng 8 làm tắt, chưa list filesystem.
+- Nhờ vậy mới biết điểm yếu của Kim để tiếp tục cải thiện.
+
+**Quyết định đã ra**: 
+- Xóa note-rac.md (trang test, không có nội dung thật)
+- Xóa broken link `[[trang-khong-ton-tai]]` trong thong_tin_mau_thuan.md
+- Sẽ tìm giải pháp sửa rule trong AGENTS_MASTER.md để đảm bảo Kim xử lý nhất quán, không làm tắt — cụ thể: bước quét của Luồng 8 cần phải list toàn bộ thư mục wiki/ + đối chiếu với index.md, không chỉ đọc index
+
+**Vấn đề đang mở**: 
+- Cần sửa AGENTS_MASTER.md — bổ sung bước kiểm tra chéo (list filesystem vs index) cho Luồng 8 để tránh bỏ sót trang mồ côi. Chưa chốt phương án cụ thể.
+
+**Điều hoạt động tốt**: 
+- Luồng 4 (Lint) phát hiện đầy đủ 3 vấn đề: 1 trang mồ côi, 1 broken link, 1 thiếu định dạng — checklist lint hoạt động chính xác
+
+**Điều sẽ làm khác**: 
+- Khi thực thi Luồng 8, phải list filesystem thay vì chỉ đọc index.md
+
+**Tri thức mới → wiki**: 
+- Không có trang mới được tạo/cập nhật từ reflection này
+
+**Tâm trạng / Năng lượng**: 3 ⭐ — Phát hiện bug trong quy trình, cần sửa rule
+
+---
 
 ---
 

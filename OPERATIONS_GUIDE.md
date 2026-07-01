@@ -180,6 +180,68 @@ Dùng khi bạn có file `.docx`, `.pdf`, hoặc `.xlsx` đã chốt, không tha
 
 ---
 
+### 💬 KHI CÓ FILE CHAT LOG CẦN EXTRACT: Chat Log Extraction (Luồng 13)
+
+Dùng khi bạn có file chat log (xuất từ Cline, Claude Web, ChatGPT...) muốn rút
+trích các vấn đề đã chốt hoặc đang thảo luận vào wiki.
+
+**Bước 1 — Bạn chuẩn bị file:**
+- Đặt tên file đúng format: `project-chat-YYYYMMDD.md`
+  - Ví dụ: `webapp-chat-20260701.md`, `bod-chat-20260701.md`
+- Dòng đầu tiên (optional): `Nguồn: cline` hoặc `Nguồn: chatgpt`... để Kim biết
+  nguồn gốc chat. Nếu không có → Kim sẽ ghi "nguồn: không rõ".
+- Copy file vào `project-X/raw/do/` (phải đúng project bạn muốn extract vào).
+  - Ví dụ: `project-llm-wiki-webapp/raw/do/webapp-chat-20260701.md`
+
+**Bước 2 — Bạn gõ lệnh trigger:**
+- `"Đưa file chat log webapp-chat-20260701.md trong project-llm-wiki-webapp"`
+- Hoặc: `"Tổng hợp chat này"` (nếu đã mở file chat trong context)
+- Hoặc: `"Extract vấn đề đã chốt từ chat hôm nay"`
+
+**Kim sẽ làm:**
+1. Kiểm tra tên file đúng format, nằm đúng `raw/do/` của project → nếu sai, báo lỗi, dừng.
+2. Quét toàn bộ chat, kiểm tra có đoạn nào lạc sang project khác không → nếu có, dừng và yêu cầu bạn sửa file gốc.
+3. Liệt kê candidate list: mỗi vấn đề 1 câu + trích đoạn gốc + gợi ý "có vẻ đã chốt" hoặc "có vẻ đang thảo luận".
+4. Hỏi bạn từng item một theo format a/b/c/d:
+
+```
+📋 CANDIDATE #1/5 — project-llm-wiki-webapp
+
+Vấn đề: Nên dùng PostgreSQL thay vì SQLite cho production
+Trích đoạn: "Quyết định cuối: dùng PostgreSQL từ Q3 trở đi" (dòng 42-43)
+Đánh giá sơ bộ: Có vẻ đã chốt
+
+Xác nhận:
+(a) Đúng, đã chốt → ghi vào wiki
+(b) Chưa chốt, chỉ thảo luận → ghi vào pending
+(c) Đúng nhưng diễn giải sai → bạn sửa lại
+(d) Bỏ qua, không ghi
+```
+
+**Ý nghĩa từng lựa chọn:**
+- **a)** Vấn đề đã được quyết định dứt khoát → Kim ghi vào `wiki/` (có kiểm tra conflict với wiki hiện tại trước khi ghi)
+- **b)** Mới chỉ bàn bạc, chưa có quyết định cuối → Kim ghi vào `wiki/pending-chat-issue.md` để theo dõi sau
+- **c)** Đúng ý nhưng Kim diễn đạt sai → bạn nói lại ý đúng, Kim ghi theo bản sửa của bạn
+- **d)** Không cần lưu → bỏ qua item này
+
+**Trường hợp Kim báo "phát hiện nội dung lạc project":**
+- Kim sẽ liệt kê đoạn nghi ngờ + lý do. Bạn phải:
+  1. Mở file gốc trong `raw/do/`, xóa đoạn không liên quan (hoặc tách ra file
+     riêng cho project kia)
+  2. Chạy lại lệnh từ đầu
+  3. **Không bỏ qua** — Kim cứng nhắc vụ này để tránh tri thức bị ghi sai project.
+
+**Bước 3 — Bạn kiểm tra kết quả:**
+- Các vấn đề đã chốt (a/c) → xuất hiện trong `project-X/wiki/` (trang mới hoặc
+  trang được cập nhật), có dòng nguồn `(nguồn: webapp-chat-20260701.md, ngày 2026-07-01)`
+- Các vấn đề đang thảo luận (b) → trong `project-X/wiki/pending-chat-issue.md`
+- File chat gốc → đã được chuyển từ `raw/do/` sang `raw/done/`
+- `wiki/log.md` → có dòng: "Ingest chat log 2026-07-01, chốt N/M vấn đề, K vào pending."
+
+**Thời gian**: 2-5 phút (tùy độ dài chat)
+
+---
+
 ### ⚠️ Khi có conflict: Giải quyết mâu thuẫn
 
 **Trigger**: AI báo conflict trong lúc ingest, hoặc bạn chủ động kiểm tra.
@@ -325,6 +387,7 @@ Các file log sẽ được archive theo tháng:
 | `"Đối tác X đang có issue nào mở?"` | Hỏi tình trạng issue với đối tác | Khi cần nắm tình hình |
 | `"Archive agreement project-X"` | Lưu file đã thống nhất vào agreement | Khi có file .docx/.pdf/.xlsx đã chốt |
 | `"Project-X có agreement nào active?"` | Tra cứu agreement đang hiệu lực | Khi cần đối chứng |
+| `"Đưa file chat log X"` / `"Tổng hợp chat này"` | Extract vấn đề đã chốt từ chat log | Khi có file chat log cần rút trích |
 
 ---
 
@@ -339,6 +402,7 @@ Các file log sẽ được archive theo tháng:
 🔍 HỎI:    "Tìm thông tin về X" / "Tư vấn về Y" / "Tại sao Z?"
 🔍 ĐỐI TÁC: "Đối tác X đang có issue nào mở?"
 🔍 ĐỐI CHỨNG: "Project-X có agreement nào về Y?"
+💬 CHAT LOG: Thả file chat vào raw/do/ → "Đưa file chat log {tên} trong project-X"
 🌙 TỐI:    "Reflection"
 📅 T6:      "Lint toàn bộ"
 📅 ĐẦU THÁNG: "Kiểm tra query log"
@@ -402,6 +466,112 @@ AI sẽ tổng hợp:
 - Query log chưa lưu
 - Lần lint cuối cùng
 - Cảnh báo nếu có vấn đề
+
+---
+
+---
+
+## 📋 VÍ DỤ INPUT/OUTPUT TỪNG LUỒNG
+
+Tham khảo file `KICH_BAN_TEST_12_LUONG.md` để xem kịch bản test chi tiết kèm dữ
+liệu mẫu cho từng luồng:
+
+| Luồng | Kịch bản test |
+|---|---|
+| 1 — Daily Scan | [Giai đoạn 1 — Test 1: Daily Scan](KICH_BAN_TEST_12_LUONG.md#test-1--luồng-1-daily-scan) |
+| 2 — Ingest | [Giai đoạn 1 — Test 2: Ingest](KICH_BAN_TEST_12_LUONG.md#test-2--luồng-2-ingest) |
+| 3 + Conflict + 10 | [Giai đoạn 1 — Test 3: Conflict + Feedback Loop](KICH_BAN_TEST_12_LUONG.md#test-3--luồng-3--luồng-xử-lý-conflict--luồng-10-conflict-feedback-loop) |
+| 4 — Lint/Audit | [Giai đoạn 1 — Test 4: Lint/Audit](KICH_BAN_TEST_12_LUONG.md#test-4--luồng-4-lintaudit) |
+| 5 — Contextual Search | [Giai đoạn 2 — Test 5: Contextual Search](KICH_BAN_TEST_12_LUONG.md#test-5--luồng-5-contextual-search) |
+| 6 — Local Reasoning | [Giai đoạn 2 — Test 6: Local Reasoning](KICH_BAN_TEST_12_LUONG.md#test-6--luồng-6-local-reasoning) |
+| 7 — Strategic Advisor | [Giai đoạn 2 — Test 7: Strategic Advisor](KICH_BAN_TEST_12_LUONG.md#test-7--luồng-7-strategic-advisor) |
+| 8 — Daily Companion | [Giai đoạn 3 — Test 8: Daily Companion](KICH_BAN_TEST_12_LUONG.md#test-8--luồng-8-daily-companion) |
+| 9 — Knowledge Interviewer | [Giai đoạn 3 — Test 9: Knowledge Interviewer](KICH_BAN_TEST_12_LUONG.md#test-9--luồng-9-knowledge-interviewer) |
+| 11 — Partner Tracker | [Giai đoạn 4 — Test 10: Partner Tracker Sync](KICH_BAN_TEST_12_LUONG.md#test-10--luồng-11-partner-tracker-sync) |
+| 12 — Agreement Archive | [Giai đoạn 4 — Test 11: Agreement Archive](KICH_BAN_TEST_12_LUONG.md#test-11--luồng-12-agreement-archive) |
+
+### Ví dụ Luồng 13 — Chat Log Extraction
+
+**Input:** File `project-llm-wiki-webapp/raw/do/webapp-chat-20260701.md`
+
+```markdown
+Nguồn: cline
+
+[14:02] Phi: Quyết định cuối: webapp sẽ dùng PostgreSQL thay SQLite từ Q3
+
+[14:05] Cline: Đã note. Cần migrate schema cũ không?
+
+[14:07] Phi: Có, viết script migrate toàn bộ. Ưu tiên xong trước 15/7.
+
+[14:15] Phi: Còn vụ auth, đang phân vân giữa JWT và session-based.
+
+[14:18] Cline: JWT phù hợp hơn vì webapp là SPA, không cần session server.
+
+[14:20] Phi: Chưa chốt, để research thêm. Có thể hybrid.
+
+[14:30] Phi: À, liên quan đến core-isofh: họ cũng đang đổi DB schema.
+```
+
+**Output — Candidate list Kim hiển thị:**
+
+```
+📋 CANDIDATE #1/3 — project-llm-wiki-webapp
+
+Vấn đề: Webapp dùng PostgreSQL thay SQLite từ Q3
+Trích đoạn: "Quyết định cuối: webapp sẽ dùng PostgreSQL thay SQLite từ Q3" (dòng 3)
+Đánh giá sơ bộ: Có vẻ đã chốt
+
+(a) Đúng, đã chốt → ghi vào wiki
+(b) Chưa chốt, chỉ thảo luận → ghi vào pending
+(c) Đúng nhưng diễn giải sai
+(d) Bỏ qua
+
+---
+
+📋 CANDIDATE #2/3 — project-llm-wiki-webapp
+
+Vấn đề: Cần viết script migrate schema cũ, deadline 15/7
+Trích đoạn: "Có, viết script migrate toàn bộ. Ưu tiên xong trước 15/7." (dòng 7)
+Đánh giá sơ bộ: Có vẻ đã chốt
+
+(a) Đúng, đã chốt → ghi vào wiki
+(b) Chưa chốt, chỉ thảo luận → ghi vào pending
+(c) Đúng nhưng diễn giải sai
+(d) Bỏ qua
+
+---
+
+📋 CANDIDATE #3/3 — project-llm-wiki-webapp
+
+Vấn đề: Auth: đang phân vân JWT vs session-based, chưa chốt
+Trích đoạn: "Chưa chốt, để research thêm. Có thể hybrid." (dòng 13)
+Đánh giá sơ bộ: Có vẻ đang thảo luận
+
+(a) Đúng, đã chốt → ghi vào wiki
+(b) Chưa chốt, chỉ thảo luận → ghi vào pending
+(c) Đúng nhưng diễn giải sai
+(d) Bỏ qua
+```
+
+**Sau khi user chọn (a) cho #1, (a) cho #2, (b) cho #3:**
+
+- `wiki/` có trang mới/cập nhật về PostgreSQL decision + script migrate
+- `wiki/pending-chat-issue.md` có 1 dòng: `2026-07-01 | Auth: JWT vs session-based, chưa chốt (hybrid?) | webapp-chat-20260701.md`
+- `wiki/log.md`: "Ingest chat log 2026-07-01, chốt 2/3 vấn đề, 1 vào pending."
+- File gốc → `raw/done/webapp-chat-20260701.md`
+
+**Trường hợp file có nội dung lạc project (dòng cuối về core-isofh):**
+Kim DỪNG toàn bộ luồng, báo:
+```
+⚠️ PHÁT HIỆN NỘI DUNG LẠC PROJECT
+
+File: webapp-chat-20260701.md (project: project-llm-wiki-webapp)
+Đoạn nghi ngờ (dòng 16): "À, liên quan đến core-isofh: họ cũng đang đổi DB schema."
+Lý do: Nội dung rõ ràng thuộc về project-llm-wiki-core-isofh
+
+Yêu cầu: Sửa file gốc (xóa đoạn trên hoặc tách sang file riêng cho core-isofh)
+→ Chạy lại lệnh từ đầu.
+```
 
 ---
 
