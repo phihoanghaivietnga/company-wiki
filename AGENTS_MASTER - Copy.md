@@ -46,7 +46,7 @@ company-wiki/
 
 **Quy tắc bất di bất dịch:**
 - `raw/` (cả `do/` và `done/`) là **bất biến** — tuyệt đối không chỉnh sửa nội dung
-- AI chỉ được ghi vào: `wiki/`, `_system/`, `partner-tracker/tracker.md`, `agreements/index.md`. Được phép move file (không sửa nội dung) trong `partner-tracker/*` và `agreements/active↔archived`.
+- AI chỉ được ghi vào thư mục `wiki/` và các file trong `_system/`
 - Mọi conflict phải **flag lên người dùng**, AI không được tự quyết
 - Mọi quyết định giải quyết conflict phải ghi rõ **WHY** (lý do) — trường `lý_do` không được để trống
 
@@ -442,13 +442,7 @@ Sử dụng template `_templates/strategy-analysis.md`:
 **Bước 2: Quét nhanh raw/do/**
 Đếm số file chưa xử lý trong tất cả project.
 
-**Bước 3: Quét Partner Tracker & Agreements**
-- Với mỗi project có `partner-tracker/`: đếm issue "Đang mở" trong tracker.md; 
-  kiểm tra snapshots/ có file mới hơn "Cập nhật lần cuối" chưa (báo nếu có, chưa sync)
-- Với mỗi project có `agreements/`: kiểm tra active/ có file nào chưa xuất hiện 
-  trong bảng Active của index.md không (báo nếu có, chưa archive)
-  
-**Bước 4: Tổng hợp và gợi ý**
+**Bước 3: Tổng hợp và gợi ý**
 
 ### Format output
 
@@ -459,8 +453,6 @@ Chào buổi sáng! Tóm tắt nhanh:
 ⚠️  Conflict pending: {số} (từ {ngày})
 📝 Query log: {số} Q&A chưa lưu vào wiki
 ✅ Wiki: {số} trang, cập nhật lần cuối {ngày}
-🔄 Partner issue đang mở: {số} (project nào)
-📜 Agreement chờ archive: {số} file mới chưa index
 
 Hôm nay nên ưu tiên:
 1. [Gợi ý 1 — dựa trên pending items]
@@ -775,7 +767,7 @@ superseded_sections: []  # Điền nếu status != active
 - Luôn cập nhật `wiki/index.md` và `wiki/log.md` sau mỗi thay đổi
 - Conflict → flag, chờ người dùng quyết định, không tự ý ghi đè
 - **Mọi quyết định giải quyết conflict phải ghi rõ WHY**
-- AI chỉ được ghi vào: `wiki/`, `_system/`, `partner-tracker/tracker.md`, `agreements/index.md`. Được phép move file (không sửa nội dung) trong `partner-tracker/*` và `agreements/active↔archived`.
+- AI chỉ được ghi vào `wiki/` và `_system/`
 - Viết bằng ngôn ngữ rõ ràng, đơn giản
 - Khi không chắc cách phân loại → hỏi người dùng
 - Sau mỗi Q&A có giá trị → chủ động đề xuất lưu vào wiki
